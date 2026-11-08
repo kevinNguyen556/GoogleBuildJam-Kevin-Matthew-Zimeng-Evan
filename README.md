@@ -42,42 +42,12 @@ Your library is saved in your browser's **local storage**, so your personal phot
 - **Digital time capsules:** bury memories at spots on the world map to find later.
 - **Animated couriers:** send photos to friends via playful postal couriers.
 
-## Screenshots
-
-| Memory Map | 3D Museum | Couriers |
-|:---:|:---:|:---:|
-| *add screenshot* | *add screenshot* | *add screenshot* |
-
 ## Built With
 
 - [Google AI Studio](https://aistudio.google.com/)
 - [Gemini API](https://ai.google.dev/)
 - Browser local storage for private, on-device data
 
-## Run Locally
-
-**Prerequisites:** Node.js
-
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Start the app:
-   ```bash
-   npm run dev
-   ```
-
-## Privacy
-
-Googleheim is local-first. Your photo library, timelines, time capsules, and hunt progress are stored in your browser's local storage. Photos are only sent to the Gemini API when an AI feature, such as tagging or search, needs them.
-
-## Contributing
-
-Ideas and pull requests are welcome. Open an issue to start a discussion.
-
-## License
-
-Add your license here.
 
 <div align="center">
 
