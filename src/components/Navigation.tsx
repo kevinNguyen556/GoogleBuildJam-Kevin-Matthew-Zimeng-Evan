@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   MapPin,
   Image as ImageIcon,
@@ -11,8 +11,11 @@ import {
   Settings,
   Gamepad2,
   FlaskConical,
+  Send,
+  ChevronDown,
+  Check,
 } from 'lucide-react';
-import { ActiveTab, Album } from '../types';
+import { ActiveTab, Album, UserAccount } from '../types';
 
 interface NavigationProps {
   activeTab: ActiveTab;
@@ -26,6 +29,10 @@ interface NavigationProps {
   activeTrip: Album | null;
   onOpenStartTripModal: () => void;
   onEndTrip: () => void;
+  currentUser: UserAccount;
+  accounts: UserAccount[];
+  onSwitchAccount: (account: UserAccount) => void;
+  inTransitCount?: number;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -40,7 +47,13 @@ export const Navigation: React.FC<NavigationProps> = ({
   activeTrip,
   onOpenStartTripModal,
   onEndTrip,
+  currentUser,
+  accounts,
+  onSwitchAccount,
+  inTransitCount = 0,
 }) => {
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+
   const tabs = [
     { id: 'library' as ActiveTab, label: 'Library', icon: ImageIcon, badge: photoCount },
     {
@@ -51,12 +64,20 @@ export const Navigation: React.FC<NavigationProps> = ({
       badgeAlert: unplacedCount > 0,
     },
     { id: 'museum' as ActiveTab, label: 'Museum', icon: Building2, tag: '3D Gallery' },
+    {
+      id: 'dispatches' as ActiveTab,
+      label: 'Dispatches & Radar',
+      icon: Send,
+      tag: 'Courier',
+      badge: inTransitCount > 0 ? inTransitCount : undefined,
+      badgeAlert: inTransitCount > 0,
+    },
     { id: 'party' as ActiveTab, label: 'Party Game', icon: Gamepad2, tag: 'Friends' },
     {
       id: 'demo' as ActiveTab,
       label: 'Demo Lab',
       icon: FlaskConical,
-      tag: 'Demo Only',
+      tag: 'Simulator',
       isDemo: true,
     },
   ];
@@ -124,6 +145,52 @@ export const Navigation: React.FC<NavigationProps> = ({
                 >
                   + Trip
                 </button>
+              )}
+            </div>
+
+            {/* Account Switcher Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
+                className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl border border-[#D8C7B0] bg-[#FAF5EB] hover:bg-[#EFE6D9] text-[#2D241E] transition-all text-xs font-semibold shadow-2xs hover:shadow-xs cursor-pointer"
+                title={`Active account: ${currentUser.displayName}. Click to switch.`}
+              >
+                <img
+                  src={currentUser.avatar}
+                  alt={currentUser.displayName}
+                  className="w-5 h-5 rounded-full object-cover border border-[#B83A28]/50"
+                />
+                <span className="max-w-[85px] sm:max-w-[120px] truncate">{currentUser.displayName.split(' ')[0]}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-[#8C7A6B]" />
+              </button>
+
+              {isAccountMenuOpen && (
+                <div className="absolute right-0 mt-1.5 w-60 bg-[#FFFDF9] rounded-2xl border-2 border-[#D8C7B0] shadow-xl py-1.5 z-50 animate-fade-in text-xs">
+                  <div className="px-3 py-1.5 border-b border-[#F0E6D8] font-bold text-[#8C7A6B] uppercase tracking-wider text-[10px]">
+                    Switch Account & Library
+                  </div>
+                  {accounts.map((acc) => (
+                    <button
+                      key={acc.id}
+                      onClick={() => {
+                        onSwitchAccount(acc);
+                        setIsAccountMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-[#FAF5EB] transition-colors cursor-pointer ${
+                        acc.id === currentUser.id ? 'bg-[#F5EFEB] font-bold text-[#B83A28]' : 'text-[#2D241E]'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2.5 truncate">
+                        <img src={acc.avatar} className="w-6 h-6 rounded-full object-cover border border-[#DECDB9] shrink-0" />
+                        <div className="truncate">
+                          <div className="leading-tight truncate">{acc.displayName}</div>
+                          <div className="text-[10px] text-[#7A6958] truncate">{acc.homeCity}</div>
+                        </div>
+                      </div>
+                      {acc.id === currentUser.id && <Check className="w-4 h-4 text-[#B83A28] shrink-0" />}
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
 

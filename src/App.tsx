@@ -56,6 +56,7 @@ import { MapView } from './components/MapView';
 import { MuseumView } from './components/MuseumView';
 import { PartyGameView } from './components/PartyGameView';
 import { DemoLabView } from './components/DemoLabView';
+import { DispatchesView } from './components/DispatchesView';
 import { StartTripModal } from './components/StartTripModal';
 import { ImportModal } from './components/ImportModal';
 import { MemoryCardModal } from './components/MemoryCardModal';
@@ -129,12 +130,12 @@ export default function App() {
         let storedLogs = await getAllGuessLogsFromDB();
         let storedAccounts = await getAllAccountsFromDB();
 
-        if (storedPhotos.length === 0) {
+        if (storedPhotos.length === 0 || !storedPhotos.some((p) => p.ownerId)) {
           await savePhotosBatchToDB(INITIAL_PHOTOS);
           storedPhotos = INITIAL_PHOTOS;
         }
 
-        if (storedAlbums.length === 0) {
+        if (storedAlbums.length === 0 || !storedAlbums.some((a) => a.ownerId)) {
           for (const a of INITIAL_ALBUMS) {
             await saveAlbumToDB(a);
           }
@@ -160,21 +161,21 @@ export default function App() {
           storedFriends = SAMPLE_FRIENDS;
         }
 
-        if (storedPackages.length === 0) {
+        if (storedPackages.length === 0 || storedPackages.length < INITIAL_PACKAGES.length) {
           for (const p of INITIAL_PACKAGES) {
             await savePackageToDB(p);
           }
           storedPackages = INITIAL_PACKAGES;
         }
 
-        if (storedTreasures.length === 0) {
+        if (storedTreasures.length === 0 || storedTreasures.length < INITIAL_TREASURES.length) {
           for (const t of INITIAL_TREASURES) {
             await saveTreasureToDB(t);
           }
           storedTreasures = INITIAL_TREASURES;
         }
 
-        if (storedAccounts.length === 0) {
+        if (storedAccounts.length < DEFAULT_ACCOUNTS.length) {
           for (const acc of DEFAULT_ACCOUNTS) {
             await saveAccountToDB(acc);
           }
@@ -192,6 +193,12 @@ export default function App() {
         setAccounts(storedAccounts);
         if (storedAccounts.length > 0) {
           setCurrentUser(storedAccounts[0]);
+          setUserHome({
+            city: storedAccounts[0].homeCity,
+            latitude: storedAccounts[0].latitude,
+            longitude: storedAccounts[0].longitude,
+            postalCode: 'WAY-001',
+          });
         }
       } catch (err) {
         console.warn('Could not load IndexedDB, using in-memory fallbacks:', err);
@@ -203,6 +210,13 @@ export default function App() {
         setPackages(INITIAL_PACKAGES);
         setTreasures(INITIAL_TREASURES);
         setAccounts(DEFAULT_ACCOUNTS);
+        setCurrentUser(DEFAULT_ACCOUNTS[0]);
+        setUserHome({
+          city: DEFAULT_ACCOUNTS[0].homeCity,
+          latitude: DEFAULT_ACCOUNTS[0].latitude,
+          longitude: DEFAULT_ACCOUNTS[0].longitude,
+          postalCode: 'WAY-001',
+        });
       } finally {
         setIsLoading(false);
       }
@@ -245,6 +259,8 @@ export default function App() {
         ...p,
         albumIds,
         isOffLimits,
+        ownerId: currentUser.id,
+        ownerName: currentUser.displayName,
       };
     });
 
@@ -482,7 +498,13 @@ export default function App() {
   // Account Operations
   const handleLogin = (account: UserAccount) => {
     setCurrentUser(account);
-    showToast(`Signed in as ${account.displayName}`);
+    setUserHome({
+      city: account.homeCity,
+      latitude: account.latitude,
+      longitude: account.longitude,
+      postalCode: 'WAY-001',
+    });
+    showToast(`Switched to ${account.displayName} (${account.homeCity})`);
   };
 
   const handleCreateAccount = async (newAccount: UserAccount) => {
@@ -594,8 +616,6 @@ export default function App() {
     showToast('Photo reported.');
   };
 
-  const unplacedCount = photos.filter((p) => !p.isPlaced).length;
-
   // Theme-specific container styles
   const getThemeClass = (t: AppTheme) => {
     switch (t) {
@@ -622,6 +642,23 @@ export default function App() {
     );
   }
 
+  // Current Account specific photo library & albums
+  const currentAccountPhotos = photos.filter(
+    (p) => !p.ownerId || p.ownerId === currentUser.id
+  );
+  const currentAccountAlbums = albums.filter(
+    (a) => !a.ownerId || a.ownerId === currentUser.id
+  );
+  const unplacedCount = currentAccountPhotos.filter((p) => !p.isPlaced).length;
+
+  // Active in-transit packages for this user (sending or receiving)
+  const myInTransitCount = packages.filter(
+    (p) =>
+      !p.arrived &&
+      (p.senderId === currentUser.id ||
+        p.senderName.toLowerCase().includes(currentUser.displayName.toLowerCase().split(' ')[0]))
+  ).length;
+
   return (
     <div className={`min-h-screen ${getThemeClass(theme)} flex flex-col transition-colors duration-300`}>
       {/* Toast Notification */}
@@ -632,29 +669,34 @@ export default function App() {
         </div>
       )}
 
-      {/* Top 4-Tab Navigation Bar with Googleheim branding, settings cog next to import */}
+      {/* Top Navigation Bar with Googleheim branding, account switcher & tab links */}
       <Navigation
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onOpenImport={() => setIsImportOpen(true)}
         onOpenOffLimits={() => setIsOffLimitsOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
-        photoCount={photos.length}
+        photoCount={currentAccountPhotos.length}
         unplacedCount={unplacedCount}
         offLimitsCount={offLimitsZones.length}
         activeTrip={activeTrip}
         onOpenStartTripModal={() => setIsStartTripOpen(true)}
         onEndTrip={handleEndTrip}
+        currentUser={currentUser}
+        accounts={accounts}
+        onSwitchAccount={handleLogin}
+        inTransitCount={myInTransitCount}
       />
 
       {/* Main Views (4 Tabs: Library, Map, Museum, Party Game) */}
       <main className="flex-1">
         {activeTab === 'library' && (
           <LibraryView
-            photos={photos}
-            albums={albums}
+            photos={currentAccountPhotos}
+            albums={currentAccountAlbums}
             friends={friends}
             activeTrip={activeTrip}
+            currentUser={currentUser}
             onSelectPhoto={(photo) => {
               setSelectedPhoto(photo);
               setIsMemoryModalOpen(true);
@@ -693,8 +735,8 @@ export default function App() {
 
         {activeTab === 'museum' && (
           <MuseumView
-            photos={photos}
-            albums={albums}
+            photos={currentAccountPhotos}
+            albums={currentAccountAlbums}
             friends={friends}
             offLimitsZones={offLimitsZones}
             guessLogs={guessLogs}
@@ -713,10 +755,52 @@ export default function App() {
           />
         )}
 
+        {activeTab === 'dispatches' && (
+          <DispatchesView
+            currentUser={currentUser}
+            accounts={accounts}
+            onSwitchAccount={handleLogin}
+            photos={currentAccountPhotos}
+            friends={friends}
+            packages={packages}
+            treasures={treasures}
+            ghostPins={ghostPins}
+            onAddPackage={async (p) => {
+              setPackages((prev) => [p, ...prev]);
+              await savePackageToDB(p);
+              showToast(
+                p.isMessageInBottle
+                  ? `🌊 Bottle cast into the ocean currents!`
+                  : `✉️ Postcard dispatched to ${p.recipientName}!`
+              );
+            }}
+            onUpdatePackage={async (p) => {
+              setPackages((prev) => prev.map((item) => (item.id === p.id ? p : item)));
+              await savePackageToDB(p);
+              if (p.arrived) {
+                showToast(`🎉 Keepsake arrived at ${p.toCity}!`);
+              }
+            }}
+            onAddTreasure={async (t) => {
+              setTreasures((prev) => [t, ...prev]);
+              await saveTreasureToDB(t);
+              showToast(`🏴‍☠️ "${t.photo.title}" buried as treasure at ${t.locationName}!`);
+            }}
+            onUpdateTreasure={async (t) => {
+              setTreasures((prev) => prev.map((item) => (item.id === t.id ? t : item)));
+              await saveTreasureToDB(t);
+            }}
+            onSelectPhoto={(photo) => {
+              setSelectedPhoto(photo);
+              setIsMemoryModalOpen(true);
+            }}
+          />
+        )}
+
         {activeTab === 'party' && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <PartyGameView
-              photos={photos}
+              photos={currentAccountPhotos}
               friends={friends}
               offLimitsZones={offLimitsZones}
               onMarkPhotosGameReady={handleMarkPhotosGameReady}
@@ -726,11 +810,13 @@ export default function App() {
 
         {activeTab === 'demo' && (
           <DemoLabView
-            photos={photos}
+            photos={currentAccountPhotos}
             friends={friends}
             treasures={treasures}
             packages={packages}
             currentUser={currentUser}
+            accounts={accounts}
+            onSwitchAccount={handleLogin}
             onUpdatePhoto={handleUpdatePhoto}
             onAddTreasure={async (t) => {
               setTreasures((prev) => [t, ...prev]);

@@ -22,7 +22,7 @@ import {
   ArrowUpDown,
   Plus,
 } from 'lucide-react';
-import { Photo, Album, ColorFamily, StructuredSearchFilter, Friend } from '../types';
+import { Photo, Album, ColorFamily, StructuredSearchFilter, Friend, UserAccount } from '../types';
 
 interface LibraryViewProps {
   photos: Photo[];
@@ -42,6 +42,7 @@ interface LibraryViewProps {
   onSendAsBottle: (photo: Photo) => void;
   onSendToFriend: (photo: Photo, friend: Friend) => void;
   onPlacePhotoOnMap: (photo: Photo) => void;
+  currentUser?: UserAccount;
 }
 
 export const LibraryView: React.FC<LibraryViewProps> = ({
@@ -62,7 +63,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   onSendAsBottle,
   onSendToFriend,
   onPlacePhotoOnMap,
+  currentUser,
 }) => {
+  // Photo deletion confirmation modal state
+  const [photoToDelete, setPhotoToDelete] = useState<Photo | null>(null);
+
   // Active Album filter
   const [selectedAlbumId, setSelectedAlbumId] = useState<string>('all');
 
@@ -411,12 +416,9 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             {/* Delete Photo */}
             <button
               onClick={() => {
-                if (confirm('Delete this photo from your gallery?')) {
-                  onDeletePhoto(selectedPhoto.id);
-                  setActiveSelectedPhotoId(null);
-                }
+                setPhotoToDelete(selectedPhoto);
               }}
-              className="p-1.5 text-rose-300 hover:text-white hover:bg-rose-900/40 rounded-lg transition-colors"
+              className="p-1.5 text-rose-300 hover:text-white hover:bg-rose-900/40 rounded-lg transition-colors cursor-pointer"
               title="Delete photo"
             >
               <Trash2 className="w-4 h-4" />
@@ -618,10 +620,10 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (confirm('Delete this photo?')) onDeletePhoto(photo.id);
+                      setPhotoToDelete(photo);
                     }}
                     title="Delete photo"
-                    className="p-1 rounded-full bg-black/60 text-white hover:bg-[#B83A28] transition-colors"
+                    className="p-1 rounded-full bg-black/60 text-white hover:bg-[#B83A28] transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
@@ -725,6 +727,45 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* In-App Delete Confirmation Modal (Replaces browser confirm) */}
+      {photoToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in">
+          <div className="bg-[#FFFDF9] rounded-2xl border-2 border-[#D8C7B0] p-6 max-w-sm w-full shadow-2xl text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-rose-100 text-[#B83A28] flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-base text-[#2D241E]">Delete Photograph?</h3>
+              <p className="text-xs text-[#7A6958] mt-1.5 leading-relaxed">
+                Are you sure you want to remove <span className="font-semibold text-[#2D241E]">&ldquo;{photoToDelete.title}&rdquo;</span> from your scrapbook? This cannot be undone.
+              </p>
+            </div>
+            <div className="flex space-x-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setPhotoToDelete(null)}
+                className="flex-1 px-4 py-2 text-xs font-semibold text-[#5A4E42] bg-[#F3EDE2] hover:bg-[#EAE2D3] rounded-xl transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onDeletePhoto(photoToDelete.id);
+                  if (activeSelectedPhotoId === photoToDelete.id) {
+                    setActiveSelectedPhotoId(null);
+                  }
+                  setPhotoToDelete(null);
+                }}
+                className="flex-1 px-4 py-2 text-xs font-semibold text-white bg-[#B83A28] hover:bg-[#9E2F20] rounded-xl shadow-xs transition-colors cursor-pointer"
+              >
+                Delete Photo
+              </button>
+            </div>
           </div>
         </div>
       )}

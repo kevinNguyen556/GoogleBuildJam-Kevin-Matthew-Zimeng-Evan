@@ -22,10 +22,12 @@ export const OffLimitsModal: React.FC<OffLimitsModalProps> = ({
   const [longitude, setLongitude] = useState('');
   const [radiusMeters, setRadiusMeters] = useState(1000);
   const [isAdding, setIsAdding] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const handleUseCurrentLocation = () => {
+    setError(null);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -34,7 +36,7 @@ export const OffLimitsModal: React.FC<OffLimitsModalProps> = ({
           if (!name) setName('My Current Location');
         },
         (err) => {
-          alert('Could not access current location: ' + err.message);
+          setError('Could not access current location: ' + err.message);
         }
       );
     }
@@ -42,11 +44,12 @@ export const OffLimitsModal: React.FC<OffLimitsModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     const lat = parseFloat(latitude);
     const lon = parseFloat(longitude);
 
     if (isNaN(lat) || isNaN(lon)) {
-      alert('Please enter valid numeric latitude and longitude.');
+      setError('Please enter valid numeric latitude and longitude.');
       return;
     }
 

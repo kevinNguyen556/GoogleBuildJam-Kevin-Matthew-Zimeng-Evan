@@ -38,6 +38,8 @@ interface DemoLabViewProps {
   treasures: BuriedTreasure[];
   packages: InTransitPackage[];
   currentUser: UserAccount;
+  accounts: UserAccount[];
+  onSwitchAccount: (account: UserAccount) => void;
   onUpdatePhoto: (photo: Photo) => void;
   onAddTreasure: (treasure: BuriedTreasure) => void;
   onUpdateTreasure: (treasure: BuriedTreasure) => void;
@@ -53,6 +55,8 @@ export const DemoLabView: React.FC<DemoLabViewProps> = ({
   treasures,
   packages,
   currentUser,
+  accounts,
+  onSwitchAccount,
   onUpdatePhoto,
   onAddTreasure,
   onUpdateTreasure,
@@ -62,9 +66,7 @@ export const DemoLabView: React.FC<DemoLabViewProps> = ({
   onNavigateTab,
 }) => {
   // Currently acting as this persona (either a simulated friend or current user)
-  const [activePersonaId, setActivePersonaId] = useState<string>(
-    friends[0]?.id || 'friend-clara'
-  );
+  const [activePersonaId, setActivePersonaId] = useState<string>(currentUser.id);
 
   // Active testing tool sub-panel
   const [activeTool, setActiveTool] = useState<'bottle' | 'treasure' | 'send' | 'notes' | 'guess'>(
@@ -394,61 +396,74 @@ export const DemoLabView: React.FC<DemoLabViewProps> = ({
         </div>
       </div>
 
-      {/* PERSONA SWITCHER SELECTOR */}
-      <div className="bg-white p-4 rounded-3xl border border-[#DECDB9] shadow-xs space-y-3">
+      {/* PERSONA / ACCOUNT SWITCHER SELECTOR */}
+      <div className="bg-white p-5 rounded-3xl border border-[#DECDB9] shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-[#6A5A4B] flex items-center space-x-1.5">
             <UserCheck className="w-4 h-4 text-amber-600" />
-            <span>Select Active Persona to Test With</span>
+            <span>Switch Entire Account Perspective</span>
           </span>
           <span className="text-[11px] text-[#8C7A6B]">
-            Click any persona to switch identity instantly
+            Selecting an account completely updates your Library, Museum, & Dispatches
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {/* Option: Current User */}
-          <button
-            onClick={() => setActivePersonaId('user')}
-            className={`p-3 rounded-2xl border-2 text-left flex items-center space-x-3 transition-all ${
-              activePersonaId === 'user'
-                ? 'border-amber-600 bg-amber-50 shadow-md ring-2 ring-amber-500/20'
-                : 'border-[#E5DAC8] bg-[#FAF7F2] hover:bg-white'
-            }`}
-          >
-            <img
-              src={currentUser.avatar}
-              alt={currentUser.displayName}
-              className="w-10 h-10 rounded-full object-cover border border-[#DECDB9]"
-            />
-            <div className="truncate">
-              <h5 className="text-xs font-bold text-[#2D241E] truncate">You (Curator)</h5>
-              <p className="text-[10px] text-[#7A6958] truncate">{currentUser.homeCity}</p>
-            </div>
-          </button>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          {accounts.map((acc) => {
+            const isSelected = acc.id === currentUser.id;
+            return (
+              <button
+                key={acc.id}
+                onClick={() => {
+                  setActivePersonaId(acc.id);
+                  onSwitchAccount(acc);
+                }}
+                className={`p-3 rounded-2xl border-2 text-left flex flex-col items-center sm:items-start space-y-1.5 transition-all cursor-pointer ${
+                  isSelected
+                    ? 'border-amber-600 bg-amber-50 shadow-md ring-2 ring-amber-500/20'
+                    : 'border-[#E5DAC8] bg-[#FAF7F2] hover:bg-white'
+                }`}
+              >
+                <img
+                  src={acc.avatar}
+                  alt={acc.displayName}
+                  className="w-10 h-10 rounded-full object-cover border border-[#DECDB9] shrink-0"
+                />
+                <div className="truncate w-full text-center sm:text-left">
+                  <h5 className="text-xs font-bold text-[#2D241E] truncate">{acc.displayName}</h5>
+                  <p className="text-[10px] text-[#7A6958] truncate">{acc.homeCity}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
 
-          {/* Option: Simulated Friends */}
-          {friends.map((f) => (
+        {/* Action jump banner */}
+        <div className="bg-amber-50 border border-amber-300 rounded-2xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <div className="text-amber-950 font-medium">
+            Active Account: <strong className="font-bold text-[#2D241E]">{currentUser.displayName}</strong> ({currentUser.homeCity}).
+            Library & 3D Museum are curated to this account.
+          </div>
+          <div className="flex flex-wrap gap-2 shrink-0">
             <button
-              key={f.id}
-              onClick={() => setActivePersonaId(f.id)}
-              className={`p-3 rounded-2xl border-2 text-left flex items-center space-x-3 transition-all ${
-                activePersonaId === f.id
-                  ? 'border-amber-600 bg-amber-50 shadow-md ring-2 ring-amber-500/20'
-                  : 'border-[#E5DAC8] bg-[#FAF7F2] hover:bg-white'
-              }`}
+              onClick={() => onNavigateTab('library')}
+              className="px-3 py-1.5 bg-[#2D241E] hover:bg-black text-white font-bold rounded-xl transition-all cursor-pointer shadow-xs"
             >
-              <img
-                src={f.avatar}
-                alt={f.name}
-                className="w-10 h-10 rounded-full object-cover border border-[#DECDB9]"
-              />
-              <div className="truncate">
-                <h5 className="text-xs font-bold text-[#2D241E] truncate">{f.name}</h5>
-                <p className="text-[10px] text-[#7A6958] truncate">{f.homeCity}</p>
-              </div>
+              Open {currentUser.displayName.split(' ')[0]}&rsquo;s Library →
             </button>
-          ))}
+            <button
+              onClick={() => onNavigateTab('museum')}
+              className="px-3 py-1.5 bg-[#B83A28] hover:bg-[#9E2F20] text-white font-bold rounded-xl transition-all cursor-pointer shadow-xs"
+            >
+              Walk in 3D Museum →
+            </button>
+            <button
+              onClick={() => onNavigateTab('dispatches')}
+              className="px-3 py-1.5 bg-white border border-[#D8C7B0] text-[#2D241E] font-bold rounded-xl hover:bg-[#F5EFEB] transition-all cursor-pointer shadow-xs"
+            >
+              Dispatches & Radar →
+            </button>
+          </div>
         </div>
       </div>
 

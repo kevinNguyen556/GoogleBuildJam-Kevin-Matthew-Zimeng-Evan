@@ -225,7 +225,7 @@ export const TreasureView: React.FC<TreasureViewProps> = ({
     if (nearbyTreasure.unlockDate) {
       const unlockTime = new Date(nearbyTreasure.unlockDate).getTime();
       if (Date.now() < unlockTime) {
-        alert(`⏳ Time Capsule Locked! This keepsake cannot be unearthed until ${nearbyTreasure.unlockDate}.`);
+        console.warn(`Time capsule locked until ${nearbyTreasure.unlockDate}`);
         return;
       }
     }
@@ -383,7 +383,7 @@ export const TreasureView: React.FC<TreasureViewProps> = ({
                     setSimCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
                     setUseRealGps(true);
                   },
-                  (err) => alert('Geolocation error: ' + err.message)
+                  (err) => console.warn('Geolocation error:', err.message)
                 );
               } else {
                 setUseRealGps(false);
@@ -486,10 +486,7 @@ export const TreasureView: React.FC<TreasureViewProps> = ({
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => {
-                    if (confirm('Report this memory?')) {
-                      if (onReportPhoto) onReportPhoto(selectedTreasure.photoId);
-                      alert('Photo reported.');
-                    }
+                    if (onReportPhoto) onReportPhoto(selectedTreasure.photoId);
                   }}
                   className="p-1 text-[#9A8A7A] hover:text-[#B83A28]"
                   title="Report photo"

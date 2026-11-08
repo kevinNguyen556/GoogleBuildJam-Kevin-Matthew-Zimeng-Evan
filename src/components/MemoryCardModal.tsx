@@ -48,6 +48,7 @@ export const MemoryCardModal: React.FC<MemoryCardModalProps> = ({
   );
   const [isEditing, setIsEditing] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     setTitle(photo.title);
@@ -60,6 +61,7 @@ export const MemoryCardModal: React.FC<MemoryCardModalProps> = ({
     setMysteryDifficulty(photo.mysteryDifficulty || 'medium');
     setIsEditing(false);
     setHasChanges(false);
+    setShowDeleteConfirm(false);
   }, [photo]);
 
   const handleSave = () => {
@@ -142,21 +144,38 @@ export const MemoryCardModal: React.FC<MemoryCardModalProps> = ({
 
         {/* Modal Actions */}
         <div className="absolute top-4 right-4 flex items-center space-x-2 z-10">
-          <button
-            onClick={() => {
-              if (confirm('Are you sure you want to remove this photo from your scrapbook?')) {
-                onDeletePhoto(photo.id);
-                onClose();
-              }
-            }}
-            title="Delete photo"
-            className="p-2 text-[#9A8A7A] hover:text-[#B83A28] hover:bg-[#F4ECE1] rounded-full transition-colors"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+          {showDeleteConfirm ? (
+            <div className="flex items-center space-x-1.5 bg-[#FAF0ED] border border-[#ECCDC5] rounded-full px-2.5 py-1 animate-fade-in shadow-xs">
+              <span className="text-[11px] font-bold text-[#B83A28]">Delete photo?</span>
+              <button
+                onClick={() => {
+                  onDeletePhoto(photo.id);
+                  setShowDeleteConfirm(false);
+                  onClose();
+                }}
+                className="px-2 py-0.5 bg-[#B83A28] text-white hover:bg-[#9E2F20] text-[11px] font-bold rounded-full transition-colors cursor-pointer"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-2 py-0.5 bg-white text-[#7A6958] hover:bg-[#EFE6D9] text-[11px] font-medium rounded-full border border-[#D8C7B0] transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              title="Delete photo"
+              className="p-2 text-[#9A8A7A] hover:text-[#B83A28] hover:bg-[#F4ECE1] rounded-full transition-colors cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
           <button
             onClick={onClose}
-            className="p-2 text-[#9A8A7A] hover:text-[#2D241E] hover:bg-[#F4ECE1] rounded-full transition-colors"
+            className="p-2 text-[#9A8A7A] hover:text-[#2D241E] hover:bg-[#F4ECE1] rounded-full transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>

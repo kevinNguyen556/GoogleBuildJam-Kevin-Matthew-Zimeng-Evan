@@ -232,10 +232,8 @@ export const GuessTheSpotModal: React.FC<GuessTheSpotModalProps> = ({
   };
 
   const handleReport = () => {
-    if (confirm('Report this memory photo for safety review?')) {
-      setReported(true);
-      if (onReportPhoto) onReportPhoto(photo.id);
-    }
+    setReported(true);
+    if (onReportPhoto) onReportPhoto(photo.id);
   };
 
   return (

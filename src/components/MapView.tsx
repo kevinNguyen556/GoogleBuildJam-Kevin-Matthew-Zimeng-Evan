@@ -389,7 +389,6 @@ export const MapView: React.FC<MapViewProps> = ({
 
   const handleStartTour = () => {
     if (chronologicalPhotos.length === 0) {
-      alert('Add some geotagged photos to start your memory tour!');
       return;
     }
     setTourIndex(0);

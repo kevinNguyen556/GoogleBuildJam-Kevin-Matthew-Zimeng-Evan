@@ -55,6 +55,9 @@ export interface Photo {
   // Safety & Privacy
   isReported?: boolean;
   reportReason?: string;
+  // Account Ownership
+  ownerId?: string;
+  ownerName?: string;
 }
 
 export interface MemoryPin {
@@ -94,6 +97,8 @@ export interface Album {
   startDate?: string;
   endDate?: string;
   createdAt: number;
+  ownerId?: string;
+  ownerName?: string;
 }
 
 export interface OffLimitsZone {
@@ -137,7 +142,7 @@ export interface UserHomeLocation {
   postalCode: string;
 }
 
-export type ActiveTab = 'library' | 'map' | 'museum' | 'party' | 'demo';
+export type ActiveTab = 'library' | 'map' | 'museum' | 'party' | 'dispatches' | 'demo';
 
 export type AppTheme = 'gallery' | 'parchment' | 'midnight' | 'terracotta';
 

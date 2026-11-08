@@ -712,14 +712,11 @@ export const SendView: React.FC<SendViewProps> = ({
                     <span>Distance: {pkg.distanceKm.toLocaleString()} km</span>
                     <button
                       onClick={() => {
-                        if (confirm('Report this received photo?')) {
-                          if (onReportPhoto) onReportPhoto(pkg.photoIds[0]);
-                          alert('Report recorded.');
-                        }
+                        if (onReportPhoto) onReportPhoto(pkg.photoIds[0]);
                       }}
-                      className="text-[#9A8A7A] hover:text-[#B83A28] flex items-center"
+                      className="text-[#9A8A7A] hover:text-[#B83A28] flex items-center cursor-pointer"
                     >
-                      <Flag className="w-3 h-3 mr-1" /> Report
+                      <Flag className="w-3 h-3 mr-1" /> Reported
                     </button>
                   </div>
                 </div>
