@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-parchment: #F7F3EB;
+    --paper-card: #FCFAF6;
+    --paper-card-warm: #FFFDF9;
+    --postal-red: #B83A28;
+    --postal-blue: #235478;
+    --postal-navy: #1B2B3A;
+    --postal-stamp-border: #D6C7B2;
+    --postal-ink: #2D241E;
+    --postal-gold: #C28B38;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: #F5EFEB;
+    color: #2D241E;
+  }
+}
+
+.font-handwriting {
+  font-family: 'Caveat', 'Patrick Hand', cursive;
+}
+
+.font-reenie {
+  font-family: 'Reenie Beanie', cursive;
+}
+
+.font-serif-vintage {
+  font-family: 'Newsreader', Georgia, serif;
+}
+
+/* Postal Stamp Perforations */
+.stamp-border {
+  background: radial-gradient(transparent 0px, transparent 4px, white 4.5px);
+  background-size: 14px 14px;
+}
+
+.stamp-edge {
+  box-shadow: 0 4px 12px rgba(45, 36, 30, 0.08);
+  border: 1px dashed #D6C7B2;
+  position: relative;
+}
+
+/* Postmark cancellation stamp */
+.postmark-circle {
+  border: 2px solid rgba(184, 58, 40, 0.45);
+  border-radius: 9999px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+
+.postmark-wavy {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 4px,
+    rgba(184, 58, 40, 0.35) 4px,
+    rgba(184, 58, 40, 0.35) 6px
+  );
+}
+
+/* Airmail edge stripes */
+.airmail-border {
+  background: repeating-linear-gradient(
+    -45deg,
+    #B83A28 0,
+    #B83A28 12px,
+    transparent 12px,
+    transparent 18px,
+    #235478 18px,
+    #235478 30px,
+    transparent 30px,
+    transparent 36px
+  );
+  height: 6px;
+  width: 100%;
+}
+
+/* Polaroid Photo Style */
+.polaroid-frame {
+  background-color: #FCFAF6;
+  padding: 10px 10px 28px 10px;
+  box-shadow: 0 6px 18px -4px rgba(45, 36, 30, 0.16), 0 2px 6px -1px rgba(45, 36, 30, 0.1);
+  border: 1px solid rgba(214, 199, 178, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.polaroid-frame:hover {
+  box-shadow: 0 12px 28px -6px rgba(45, 36, 30, 0.22);
+}
+
+/* Paper textured card */
+.paper-sheet {
+  background-color: #FFFDF8;
+  background-image: radial-gradient(#E8DFC8 0.75px, transparent 0.75px);
+  background-size: 16px 16px;
+  border: 1px solid #E6DCCD;
+  box-shadow: 0 4px 15px -3px rgba(60, 48, 38, 0.08);
+}
+
+/* Leaflet Overrides for Scrapbook Aesthetic */
+.leaflet-container {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  background-color: #ECE5DC !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: #FFFDF9 !important;
+  border-radius: 12px !important;
+  padding: 4px !important;
+  border: 1px solid #E2D5C3 !important;
+  box-shadow: 0 10px 25px -5px rgba(45, 36, 30, 0.25) !important;
+}
+
+.leaflet-popup-tip {
+  background: #FFFDF9 !important;
+}
+
+/* Postal pin marker style */
+.wayfarer-marker-pin {
+  transition: transform 0.2s ease;
+}
+.wayfarer-marker-pin:hover {
+  transform: scale(1.12) translateY(-4px);
+  z-index: 1000 !important;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F1ECE4;
+}
+::-webkit-scrollbar-thumb {
+  background: #D2C4B3;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #BAA995;
+}

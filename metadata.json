@@ -1,0 +1,6 @@
+{
+  "name": "Wayfarer",
+  "description": "Smart photo album and memory map with cozy scrapbook and postal theme, EXIF extraction, AI tagging, and chronological tours.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
